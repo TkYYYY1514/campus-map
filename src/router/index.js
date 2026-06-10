@@ -34,7 +34,7 @@ const routes = [
   { 
     path: '/poi', 
     name: 'PoiOperation', 
-    component: () => import('@/views/sidebar/PoiOperation.vue') 
+    component: () => import('@/views/sidebar/PoiOperation/index.vue') 
   },
   { 
     path: '/nav-sim', 

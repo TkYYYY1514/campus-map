@@ -1,5 +1,4 @@
 <template>
-  <!-- 地图容器 -->
   <div 
     class="map-background"
     ref="mapContainer"
@@ -9,8 +8,8 @@
     @mouseleave="handleMouseLeave"
     @wheel="handleWheel"
     @click="handleMapClick"
+    @contextmenu.prevent="handleRightClick" 
   >
-    <!-- 地图包装器，用于应用 transform 变换 -->
     <div class="map-wrapper" :style="wrapperStyle">
       <img 
         src="@/assets/img/map_bg.png"
@@ -20,9 +19,8 @@
         @contextmenu.prevent
       />
       
-      <!-- POI 标记点 -->
       <PoiMarker
-        v-for="poi in poiStore.pois"
+        v-for="poi in visiblePois"
         :key="poi.id"
         :poi="poi"
         :scale="scale"
@@ -34,7 +32,6 @@
       />
     </div>
 
-    <!-- 悬浮坐标显示卡片 -->
     <div 
       v-if="showTooltip" 
       class="coord-tooltip"
@@ -43,96 +40,151 @@
       X: {{ Math.round(currentMapX) }}<br />
       Y: {{ Math.round(currentMapY) }}
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed ,provide } from 'vue';
+import { useMapTransform } from './composables/useMapTransform';
+import { useMapTooltip } from './composables/useMapTooltip';
+import { useMapEvents } from './composables/useMapEvents';
+import { usePoiHandlers } from './composables/usePoiHandlers';
+import { usePoiStore } from '@/stores/poiStore';
+import { ElMessage } from 'element-plus';
+import showDialog from '@/components/Dialog/Dialog.js';
+import PoiMarker from './PoiMarker.vue';
 
-// 引入 composables
-import { useMapTransform } from './composables/useMapTransform'
-import { useMapTooltip } from './composables/useMapTooltip'
-import { useMapEvents } from './composables/useMapEvents'
-import { usePoiHandlers } from './composables/usePoiHandlers'
+// 动态导入创建表单组件
+let CreatePoiForm = null;
 
-// 引入 POI Store
-import { usePoiStore } from '@/stores/poiStore'
-// 引入 POI 数据配置
-import { POI_DATA } from '@/data/poiData'
-// 引入 POI 标记组件
-import PoiMarker from './PoiMarker.vue'
+const IMAGE_WIDTH = 3000;
+const IMAGE_HEIGHT = 1600;
+const emit = defineEmits(['map-click', 'poi-click', 'poi-hover', 'poi-leave']);
+const mapContainer = ref(null);
 
-// 地图原始尺寸
-const IMAGE_WIDTH = 3000
-const IMAGE_HEIGHT = 1600
-
-// 定义组件会触发的事件
-const emit = defineEmits(['map-click', 'poi-click', 'poi-hover', 'poi-leave']) 
-
-// 地图容器 DOM 引用
-const mapContainer = ref(null)
-
-// 初始化地图变换功能
 const mapTransform = useMapTransform({
   IMAGE_WIDTH,
   IMAGE_HEIGHT,
   mapContainerRef: mapContainer
-})
+});
 
-// 初始化悬浮坐标卡片功能
 const mapTooltip = useMapTooltip({
   mapContainerRef: mapContainer,
   scale: mapTransform.scale,
   offsetX: mapTransform.offsetX,
   offsetY: mapTransform.offsetY
-})
+});
 
-// 初始化 POI Store
-const poiStore = usePoiStore()
+const poiStore = usePoiStore();
 
-// 初始化地图事件处理
 const {
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
   handleMouseLeave,
   handleWheel,
-  handleMapClick
+  handleMapClick,
+     
 } = useMapEvents({
   mapTransform,
   mapTooltip,
   mapContainerRef: mapContainer,
   emit
-})
+});
 
-// 初始化 POI 事件处理
+
+
 const {
   handlePoiClick,
   handlePoiHover,
-  handlePoiLeave
+  handlePoiLeave,
+  centerOnPoi
 } = usePoiHandlers({
   poiStore,
   emit,
   mapTransform
-})
+});
 
-// 从解构中获取响应式数据
-const { scale, offsetX, offsetY, wrapperStyle } = mapTransform
-const { showTooltip, tooltipX, tooltipY, currentMapX, currentMapY } = mapTooltip
+provide('centerOnPoi', centerOnPoi);
 
-// 组件挂载时初始化 POI 数据
-onMounted(() => {
-  poiStore.addPois(POI_DATA)
-})
+const { scale, offsetX, offsetY, wrapperStyle } = mapTransform;
+const { showTooltip, tooltipX, tooltipY, currentMapX, currentMapY } = mapTooltip;
 
-// 暴露给父组件的接口
+// 只显示可见的点位（is_visible === 1）
+const visiblePois = computed(() => {
+  return poiStore.pois.filter(poi => poi.is_visible === 1);
+});
+
+// 右键点击处理 - 打开创建点位弹窗
+const handleRightClick = async (event) => {
+  const rect = mapContainer.value?.getBoundingClientRect();
+  if (!rect) return;
+  
+  // 计算地图坐标
+  const mapX = (event.clientX - rect.left - offsetX.value) / scale.value;
+  const mapY = (event.clientY - rect.top - offsetY.value) / scale.value;
+  
+  const position = {
+    x: Math.round(mapX),
+    y: Math.round(mapY),
+    screenX: event.clientX,
+    screenY: event.clientY
+  };
+  
+  // 动态导入表单组件
+  if (!CreatePoiForm) {
+    const module = await import('./CreatePoiForm.vue');
+    CreatePoiForm = module.default;
+  }
+  
+  // 打开弹窗
+  await showDialog(
+    { 
+      title: '新增点位',
+      left: position.screenX - 200,
+      top: position.screenY - 100,
+      draggable: true
+    },
+    CreatePoiForm,
+    {
+      initialX: position.x,
+      initialY: position.y,
+      onSuccess: async (formData, closeDialog) => {
+        try {
+          await poiStore.createPoi({
+            name: formData.name,
+            type: formData.type,
+            x: formData.x,
+            y: formData.y,
+            description: formData.description,
+            is_visible: 1
+          });
+          ElMessage.success('创建成功');
+          closeDialog();  // 关闭弹窗
+        } catch (error) {
+          ElMessage.error('创建失败');
+        }
+      }
+    },
+    'clearSameAndShow'
+  );
+};
+
+// 加载数据
+onMounted(async () => {
+  await poiStore.fetchAllPois();
+  console.log('加载的 POI 数据:', JSON.parse(JSON.stringify(poiStore.pois)));
+});
+
+
 defineExpose({ 
   scale, 
   offsetX, 
   offsetY, 
-  poiStore 
-})
+  poiStore,
+  reloadPois: () => poiStore.fetchAllPois(),
+  centerOnPoi   // ⭐ 关键：暴露这个方法
+});
 </script>
 
 <style scoped>
@@ -146,7 +198,6 @@ defineExpose({
   overflow: hidden;
   background: #1a1a2e;
 }
-
 .map-wrapper {
   position: absolute;
   top: 0;
@@ -155,14 +206,12 @@ defineExpose({
   height: 1600px;
   will-change: transform;
 }
-
 .map-image {
   width: 100%;
   height: 100%;
   display: block;
   user-select: none;
 }
-
 .coord-tooltip {
   position: fixed;
   z-index: 9999;
@@ -175,5 +224,4 @@ defineExpose({
   pointer-events: none;
   white-space: nowrap;
 }
-
 </style>

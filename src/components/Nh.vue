@@ -33,6 +33,7 @@ const typeLabel = computed(() => {
 .nh-content {
   padding: 15px;
   min-width: 200px;
+  max-width: 500px;
 }
 
 .poi-info {

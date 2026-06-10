@@ -9,5 +9,15 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     }
+  },
+  server: {
+    port: 5173,  // 前端端口
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',  // 后端地址
+        changeOrigin: true,
+        rewrite: (path) => path  // 不重写路径，保持 /api/pois
+      }
+    }
   }
 })

@@ -67,7 +67,7 @@ export function usePoiHandlers(options) {
       
       // 显示弹窗，使用 clearAllAndShow 模式确保一次只显示一个
       showDialog(
-        { left: 700,
+        { right: 250,
           
           title: poi.name,
           draggable: true 
