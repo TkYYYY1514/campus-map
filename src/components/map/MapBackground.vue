@@ -44,12 +44,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed ,provide } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useMapTransform } from './composables/useMapTransform';
 import { useMapTooltip } from './composables/useMapTooltip';
 import { useMapEvents } from './composables/useMapEvents';
 import { usePoiHandlers } from './composables/usePoiHandlers';
 import { usePoiStore } from '@/stores/poiStore';
+import { useMapStore } from '@/stores/mapStore';
 import { ElMessage } from 'element-plus';
 import showDialog from '@/components/Dialog/Dialog.js';
 import PoiMarker from './PoiMarker.vue';
@@ -76,6 +77,7 @@ const mapTooltip = useMapTooltip({
 });
 
 const poiStore = usePoiStore();
+const mapStore = useMapStore();
 
 const {
   handleMouseDown,
@@ -105,7 +107,8 @@ const {
   mapTransform
 });
 
-provide('centerOnPoi', centerOnPoi);
+// 注册到全局 store，方便任意组件调用
+mapStore.registerCenterOnPoi(centerOnPoi);
 
 const { scale, offsetX, offsetY, wrapperStyle } = mapTransform;
 const { showTooltip, tooltipX, tooltipY, currentMapX, currentMapY } = mapTooltip;

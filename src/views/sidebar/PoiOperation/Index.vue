@@ -39,6 +39,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { usePoiStore } from '@/stores/poiStore';
+import { useMapStore } from '@/stores/mapStore';
 import { POI_TYPE_LABELS } from '@/data/poiData';
 import { ElMessage } from 'element-plus';
 import PoiList from './components/PoiList.vue';
@@ -47,35 +48,12 @@ import PoiDeleteConfirm from './components/PoiDeleteConfirm.vue';
 import PoiToolbar from './components/PoiToolbar.vue';
 
 const poiStore = usePoiStore();
+const mapStore = useMapStore();
 
-// import { inject } from 'vue';
-
-// // 注入定位方法
-// const centerOnPoi = inject('centerOnPoi');
-
-// // 处理定位
-// const handleLocatePoi = (poi) => {
-//   console.log('点击了列表项:', poi);
-//   console.log('centerOnPoi 方法:', centerOnPoi);
-//   if (centerOnPoi) {
-//     centerOnPoi(poi);
-//   } else {
-//     console.error('centerOnPoi 方法不存在！');
-//   }
-// };
-// ⭐ 接收父组件传递的 mapRef
-const props = defineProps({
-  mapRef: {
-    type: Object,
-    default: null
-  }
-});
-
-
-// 处理定位
+// 处理定位（直接从全局 store 获取 centerOnPoi）
 const handleLocatePoi = (poi) => {
-  if (props.mapRef && props.mapRef.centerOnPoi) {
-    props.mapRef.centerOnPoi(poi);
+  if (mapStore.centerOnPoi) {
+    mapStore.centerOnPoi(poi);
   } else {
     console.error('地图组件未加载或 centerOnPoi 方法不存在');
   }

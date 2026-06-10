@@ -15,7 +15,7 @@
 
     <transition name="fade-slide-left">
       <div v-show="!isUIHidden" class="left">
-        <router-view :mapRef="mapRef"/>
+        <router-view />
       </div>
     </transition>
   </div>
