@@ -1,9 +1,11 @@
+//@/utils/request.js
+
 import axios from 'axios';
 
 // 创建 axios 实例
 const request = axios.create({
   baseURL: '/api',  // 根据你的实际代理配置调整
-  timeout: 10000,   // 请求超时时间
+  timeout: 60000,   // 请求超时时间
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,9 +14,9 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    // 可以在这里添加 loading 状态
-    console.log('📤 请求:', config.method?.toUpperCase(), config.url, config.data);
     
+    // console.log('📤 请求:', config.method?.toUpperCase(), config.url, config.data);
+
     // 从 localStorage 获取 token（如果需要认证）
     const token = localStorage.getItem('token');
     if (token) {
@@ -32,8 +34,8 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
-    // 可以在这里关闭 loading
-    console.log('📥 响应:', response.status, response.config.url);
+   
+    // console.log('📥 响应:', response.status, response.config.url);
     
     // 如果后端返回的数据结构有 code 字段，可以统一处理
     // if (response.data.code && response.data.code !== 200) {
@@ -58,7 +60,7 @@ request.interceptors.response.use(
           errorMessage = data?.message || '请求参数错误';
           break;
         case 401:
-          errorMessage = '未授权，请重新登录';
+          errorMessage = '用户名或密码错误';
           // 清除本地 token 并跳转到登录页
           localStorage.removeItem('token');
           // window.location.href = '/login';

@@ -23,28 +23,36 @@ export function usePoiHandlers(options) {
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
     
-    // 计算偏移量，使 POI 位于屏幕中心
-    // POI 在屏幕上的实际位置 = poi.x * scale + offsetX
-    // 要居中：offsetX = viewportWidth/2 - poi.x * scale
-    let targetX = viewportWidth / 2 - poi.x * mapTransform.scale.value
-    let targetY = viewportHeight / 2 - poi.y * mapTransform.scale.value
+    const MIN_SCALE = 1.2;
+    const currentScale = mapTransform.scale.value;
     
-    // 应用边界限制，防止地图被拖出可视区域
-    const clamped = mapTransform.clampOffset(targetX, targetY, mapTransform.scale.value)
+    let targetScale = currentScale;
+    
+    if (currentScale < MIN_SCALE) {
+      targetScale = MIN_SCALE;
+    }
+    
+    let targetX = viewportWidth / 2 - poi.x * targetScale
+    let targetY = viewportHeight / 2 - poi.y * targetScale
+    
+    const clamped = mapTransform.clampOffset(targetX, targetY, targetScale)
     targetX = clamped.x
     targetY = clamped.y
     
-    // 启用平滑过渡
     mapTransform.isTransitioning.value = true
     
-    // 设置目标位置（CSS transition 会自动处理平滑动画）
+    if (currentScale !== targetScale) {
+      mapTransform.scale.value = targetScale;
+    }
+    
     mapTransform.offsetX.value = targetX
     mapTransform.offsetY.value = targetY
     
-    // 动画结束后关闭过渡状态（恢复拖拽的即时响应）
+    poiStore.selectPoi(poi);
+    
     setTimeout(() => {
       mapTransform.isTransitioning.value = false
-    }, 450) // 略长于 CSS transition 的 0.4s
+    }, 500)
   }
 
   /**

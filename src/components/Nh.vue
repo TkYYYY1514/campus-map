@@ -61,13 +61,13 @@ const typeLabel = computed(() => {
 
 .poi-description {
   font-size: 13px;
-  color: #666;
+  color: #000000;
   line-height: 1.5;
 }
 
 .poi-coord {
   font-size: 12px;
-  color: #999;
+  color: #000;
   font-family: monospace;
 }
 </style>

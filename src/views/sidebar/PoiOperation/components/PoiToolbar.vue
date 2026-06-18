@@ -1,4 +1,3 @@
-<!-- components/PoiToolbar.vue -->
 <template>
   <div class="toolbar">
     <div class="stats">
@@ -15,8 +14,12 @@
         @input="handleSearch"
       />
       
-      <!-- 类型筛选下拉 -->
-      <el-dropdown trigger="click" @command="handleTypeFilter">
+      <!-- 类型筛选下拉 - 添加 popper-class -->
+      <el-dropdown 
+        trigger="click" 
+        @command="handleTypeFilter"
+        popper-class="type-filter-popper"
+      >
         <el-button size="small" class="filter-btn">
           类型筛选
           <el-icon class="el-icon--right"><ArrowDown /></el-icon>
@@ -64,17 +67,14 @@ const emit = defineEmits(['search', 'filter-change']);
 const searchValue = ref('');
 const selectedTypes = ref([]);
 
-// 获取类型颜色
 const getTypeColor = (type) => {
   return POI_TYPE_COLORS[type] || '#909399';
 };
 
-// 搜索输入
 const handleSearch = () => {
   emit('search', searchValue.value);
 };
 
-// 切换类型筛选
 const toggleType = (type) => {
   const index = selectedTypes.value.indexOf(type);
   if (index > -1) {
@@ -85,10 +85,8 @@ const toggleType = (type) => {
   emit('filter-change', selectedTypes.value);
 };
 
-// 处理下拉菜单点击（避免关闭）
 const handleTypeFilter = () => {};
 
-// 清空筛选
 const clearFilter = () => {
   searchValue.value = '';
   selectedTypes.value = [];
@@ -96,7 +94,6 @@ const clearFilter = () => {
   emit('filter-change', []);
 };
 
-// 重置筛选（外部调用）
 const resetFilter = () => {
   searchValue.value = '';
   selectedTypes.value = [];
@@ -139,8 +136,34 @@ defineExpose({ resetFilter });
   padding: 5px 10px;
 }
 
-/* 下拉菜单中 checkbox 文字颜色 */
 :deep(.el-checkbox__label) {
   font-size: 13px;
+}
+</style>
+
+<style>
+/* 非 scoped - 限制下拉菜单高度 */
+.type-filter-popper .el-dropdown-menu {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* 美化滚动条（可选） */
+.type-filter-popper .el-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.type-filter-popper .el-dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.type-filter-popper .el-dropdown-menu::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.type-filter-popper .el-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 </style>

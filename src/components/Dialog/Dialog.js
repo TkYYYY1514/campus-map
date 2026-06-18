@@ -4,30 +4,33 @@ import DialogVue from "./Dialog.vue";
 export const map = new WeakMap()
 const cancelFnSet = new Set()
 
-// 'clearAll' | 'clearSame' | 'overlay' | 'clearAllAndShow' | 'clearSameAndShow' | 'closeIfExist' | 'overlay'
-// clearAll 关闭之前所有弹窗，如果之前有弹窗，关闭后此次不弹出
-// clearAllAndShow 关闭之前所有弹窗，并弹出新的
-// clearSame 关闭之前同一弹窗，如果之前有弹窗，关闭后此次不弹出
-// clearSameAndShow 关闭之前同一弹窗，并弹出新的
-// closeIfExist  新加  有则关闭，无则什么都不做（不创建新弹窗）
-// 默认overlay是叠加，不关闭别的
+// *   - 'overlay': 叠加模式，不关闭现有弹窗（默认）
+// *   - 'clearAll': 关闭所有弹窗，不打开新弹窗
+// *   - 'clearAllAndShow': 关闭所有弹窗，然后打开新弹窗
+// *   - 'clearSame': 关闭同类弹窗，不打开新弹窗
+// *   - 'clearSameAndShow': 关闭同类弹窗，然后打开新弹窗
+// *   - 'closeIfExist': 有则关闭，无则什么都不做
+
+
 function showDialog(props, component, childProps, mode = 'overlay') {
-    //把所有的弹窗关闭
-    if (mode === 'clearAll' || mode === 'clearAllAndShow') {
-        const size = cancelFnSet.size
-        cancelFnSet.forEach(cancelFn => {
-            if (typeof cancelFn === 'function') {
-                cancelFn()
+    // 把所有的弹窗关闭
+            // showDialog.js
+        if (mode === 'clearAll' || mode === 'clearAllAndShow') {
+            const size = cancelFnSet.size
+            // 不依赖 component，直接关闭所有
+            cancelFnSet.forEach(cancelFn => {
+                if (typeof cancelFn === 'function') {
+                    cancelFn()
+                }
+            })
+
+            if (size && mode === 'clearAll') {
+                console.log('clearAll: 关闭所有弹窗，不打开新弹窗')
+                return
             }
-        })
-
-        if (size && mode === 'clearAll') {
-            console.log('clearAll: 关闭所有弹窗，不打开新弹窗')
-            return
         }
-    }
 
-    //关闭同类弹窗
+    // 关闭同类弹窗
     if (mode === 'clearSame' || mode === 'clearSameAndShow') {
         const cancelFn = map.get(component)
         if (cancelFn) {
@@ -38,13 +41,12 @@ function showDialog(props, component, childProps, mode = 'overlay') {
         }
     }
     
-    //  新增：closeIfExist - 有则关闭，无则什么都不做
+    // closeIfExist - 有则关闭，无则什么都不做
     if (mode === 'closeIfExist') {
         const cancelFn = map.get(component)
         if (cancelFn) {
-            cancelFn()  // 有弹窗就关闭
+            cancelFn()
         }
-        // 无论有没有弹窗，都不继续创建新弹窗
         return
     }
 
@@ -52,6 +54,7 @@ function showDialog(props, component, childProps, mode = 'overlay') {
     const mountDom = document.createElement('div')
     mountDom.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; pointer-events: none;'
     document.body.appendChild(mountDom)
+    
     const p = new Promise((resolve, reject) => {
         const dialogInstance = createApp(h(DialogVue, {
             ...props,
@@ -61,23 +64,38 @@ function showDialog(props, component, childProps, mode = 'overlay') {
         dialogInstance.mount(mountDom)
 
         /**
-         * 关闭
+         * 关闭 - 向上飘动画（与 Dialog.vue 一致）
          */
         function cancel() {
             console.log('cancel')
-            //卸载实例
-            dialogInstance.unmount()
-            //卸载容器
-            mountDom.remove()
-            //清楚map
-            map.delete(component)
-            // 从关闭函数集合中移除
-            cancelFnSet.delete(cancel)
-            //执行回调
-            resolve(null)
+            
+            // 获取弹窗 DOM 元素
+            const dialogEl = mountDom.querySelector('.dialog')
+            if (dialogEl) {
+                // 获取弹窗当前高度
+                const height = dialogEl.offsetHeight
+                // 向上飘出屏幕 + 淡出
+                dialogEl.style.transition = 'opacity 0.5s ease-in-out, top 0.5s ease-in-out'
+                dialogEl.style.opacity = '0'
+                dialogEl.style.top = `-${height}px`
+                
+                setTimeout(() => {
+                    destroyDialog()
+                }, 500)
+            } else {
+                destroyDialog()
+            }
+            
+            function destroyDialog() {
+                dialogInstance.unmount()
+                mountDom.remove()
+                map.delete(component)
+                cancelFnSet.delete(cancel)
+                resolve(null)
+            }
         }
+        
         map.set(component, cancel)
-        // 添加到关闭函数集合
         cancelFnSet.add(cancel)
     })
 

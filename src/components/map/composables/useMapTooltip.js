@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 /**
  * 悬浮坐标卡片 composable
@@ -24,14 +24,23 @@ export function useMapTooltip(options) {
   const tooltipX = ref(0)
   // 卡片 Y 坐标
   const tooltipY = ref(0)
-  // 当前鼠标在原图上的 X 坐标
-  const currentMapX = ref(0)
-  // 当前鼠标在原图上的 Y 坐标
-  const currentMapY = ref(0)
+  
+  // 🆕 存储当前鼠标相对于地图容器的位置（用于计算）
+  const relativeMouseX = ref(0)
+  const relativeMouseY = ref(0)
 
   // 当前窗口尺寸
   let currentWidth = window.innerWidth
   let currentHeight = window.innerHeight
+
+  // 🆕 改为 computed，当 scale/offsetX/offsetY 变化时自动重新计算
+  const currentMapX = computed(() => {
+    return (relativeMouseX.value - offsetX.value) / scale.value
+  })
+
+  const currentMapY = computed(() => {
+    return (relativeMouseY.value - offsetY.value) / scale.value
+  })
 
   /**
    * 更新悬浮卡片位置和坐标显示
@@ -40,13 +49,9 @@ export function useMapTooltip(options) {
   const updateTooltip = (e) => {
     // 获取地图容器相对于窗口的位置
     const rect = mapContainerRef.value.getBoundingClientRect()
-    // 计算鼠标相对于地图容器的位置
-    const relativeX = e.clientX - rect.left
-    const relativeY = e.clientY - rect.top
-
-    // 换算成原图坐标（减去偏移量，除以缩放比例）
-    currentMapX.value = (relativeX - offsetX.value) / scale.value
-    currentMapY.value = (relativeY - offsetY.value) / scale.value
+    // 计算鼠标相对于地图容器的位置并存储
+    relativeMouseX.value = e.clientX - rect.left
+    relativeMouseY.value = e.clientY - rect.top
 
     // 计算卡片初始位置（鼠标右下方）
     let nextX = e.clientX + OFFSET_GAP

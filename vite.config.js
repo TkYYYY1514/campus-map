@@ -4,6 +4,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/campus-map/',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -11,12 +12,12 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5173,  // 前端端口
+    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',  // 后端地址
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path  // 不重写路径，保持 /api/pois
+        rewrite: (path) => path
       }
     }
   }

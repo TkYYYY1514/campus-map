@@ -83,9 +83,9 @@ export function useMapTransform(options) {
   // 地图容器的样式，包含 transform 和 cursor
   const wrapperStyle = computed(() => ({
     transform: `translate(${offsetX.value}px, ${offsetY.value}px) scale(${scale.value})`,
-    cursor: isDragging.value ? 'grabbing' : 'grab',
+    // cursor: isDragging.value ? 'grabbing' : 'grab',
     transformOrigin: '0 0',
-    transition: isTransitioning.value ? 'transform 0.4s ease-out' : 'none'
+    transition: isDragging.value ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
   }))
 
   /**

@@ -15,6 +15,7 @@ export const POI_TYPES = {
   PARKING: 'parking',
   TOILET: 'toilet',
   STADIUM: 'stadium',
+  WAYPOINT: 'waypoint',     // 🆕 路径点
   OTHER: 'other'
 }
 
@@ -30,6 +31,7 @@ export const POI_TYPE_LABELS = {
   [POI_TYPES.PARKING]: '停车场',
   [POI_TYPES.TOILET]: '卫生间',
   [POI_TYPES.STADIUM]: '体育场',
+  [POI_TYPES.WAYPOINT]: '路径点',  // 🆕
   [POI_TYPES.OTHER]: '其他'
 }
 
@@ -45,5 +47,6 @@ export const POI_TYPE_COLORS = {
   [POI_TYPES.PARKING]: '#fa8c16',        // 停车场 - 橙色
   [POI_TYPES.TOILET]: '#eb2f96',         // 卫生间 - 粉红色
   [POI_TYPES.STADIUM]: '#2f54eb',        // 体育场 - 深蓝色
+  [POI_TYPES.WAYPOINT]: '#000000',       // 🆕 路径点 - 黑色
   [POI_TYPES.OTHER]: '#8c8c8c'           // 其他 - 灰色
 }

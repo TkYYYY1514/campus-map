@@ -7,14 +7,14 @@
     @touchstart.stop="handleMouseDown"
   >
     <!-- ⭐️ 新增：顶部标题栏 -->
-    <div v-if="title" class="dialog-header no-drag">
+    <div v-if="title" class="dialog-header">
       <span class="dialog-title">{{ title }}</span>
       <!-- 关闭按钮移到了标题栏右侧 -->
       <span class="dialog-close-btn no-drag" @click="closeDialog">×</span> 
     </div>
 
     <!-- 如果没有标题但需要关闭按钮，保留右上角独立关闭按钮 -->
-    <span v-else class="dialog-close-btn no-drag" @click="closeDialog">×</span> 
+    <!-- <span v-else class="dialog-close-btn no-drag" @click="closeDialog">×</span>  -->
     
     <div class="content" ref="content">
       <slot></slot>
@@ -86,7 +86,7 @@ provide("close", closeDialog);
   background-color: rgba(255, 255, 255, 0.8); 
   border-radius: 8px;
   min-width: 150px; /* 保证最小宽度 */
-  
+  max-width: 300px;
   &.draggable { cursor: move; } 
   &.dragging { transition: none !important; } 
   &:not(.dragging) { transition: opacity 0.8s ease-in-out, top 0.8s ease-in-out; } 
@@ -97,9 +97,9 @@ provide("close", closeDialog);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding:0px 5px 0px 10px;
+  padding:6px 5px 6px 10px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  user-select: none;
+  user-select: none;border-radius: 8px 8px 0 0;
   background: rgba(#007afa,0.5);
 }
 
@@ -111,8 +111,8 @@ provide("close", closeDialog);
 
 /* 调整关闭按钮位置（放在标题栏内） */
 .dialog-close-btn {
-  width: 18px; height: 18px; line-height: 18px; text-align: center;
-  border-radius: 50%; font-size: 12px; color: #666; cursor: pointer;
+  width: 25px; height: 25px; line-height: 25px; text-align: center;
+  border-radius: 50%; font-size: 18px; color: #666; cursor: pointer;
   &:hover { color: red; background: rgba(0,0,0,0.05); }
 }
 

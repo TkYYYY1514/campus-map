@@ -1,7 +1,7 @@
 <template>
   <div class="poi-manager">
     <div class="header">
-      <h2>POI 点位管理</h2>
+      <h5>POI 点位管理</h5>
       <el-button class="btn-primary" @click="openCreateDialog">+ 新增点位</el-button>
     </div>
 
@@ -46,6 +46,8 @@ import PoiList from './components/PoiList.vue';
 import PoiFormDialog from './components/PoiFormDialog.vue';
 import PoiDeleteConfirm from './components/PoiDeleteConfirm.vue';
 import PoiToolbar from './components/PoiToolbar.vue';
+import showDialogRRR from '@/components/Dialog/Dialog.js';
+import Nh from '@/components/Nh.vue';
 
 const poiStore = usePoiStore();
 const mapStore = useMapStore();
@@ -53,9 +55,22 @@ const mapStore = useMapStore();
 // 处理定位（直接从全局 store 获取 centerOnPoi）
 const handleLocatePoi = (poi) => {
   if (mapStore.centerOnPoi) {
+    // 1. 居中
     mapStore.centerOnPoi(poi);
-  } else {
-    console.error('地图组件未加载或 centerOnPoi 方法不存在');
+    
+    // 2. 弹出弹窗
+    setTimeout(() => {
+      showDialogRRR(
+        { 
+          right: 250,
+          title: poi.name,
+          draggable: true 
+        }, 
+        Nh, 
+        { poi }, 
+        'clearAllAndShow'
+      );
+    }, 300);
   }
 };
 // 搜索关键词
@@ -74,9 +89,15 @@ const filteredByType = computed(() => {
 
 // 按关键词过滤
 const finalFilteredPois = computed(() => {
+
+  //空
   if (!searchKeyword.value.trim()) {
     return filteredByType.value;
   }
+
+  //toLowerCase 大小写转化
+  //includes 包含
+
   const keyword = searchKeyword.value.toLowerCase().trim();
   return filteredByType.value.filter(poi => {
     return (
@@ -209,7 +230,7 @@ poiStore.fetchAllPois();
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
+  padding: 2px 10px;
   border-bottom: 1px solid #eee;
   flex-shrink: 0;
 }
@@ -221,7 +242,7 @@ poiStore.fetchAllPois();
 
 .btn-primary {
   font-size: 12px;
-  padding: 4px 10px;
+  padding: 0px 5px;
   cursor: pointer;
 }
 </style>

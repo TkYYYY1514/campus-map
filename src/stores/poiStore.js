@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import poiService from '@/services/poiService';
+import poiService from '@/api/poiService';
 
 export const usePoiStore = defineStore('poi', () => {
   const pois = ref([]);

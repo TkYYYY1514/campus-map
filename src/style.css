@@ -14,23 +14,34 @@
   user-drag: none;
 }
 
-
-
-/* 统一 el-table 滚动条样式 */
-.el-table__body-wrapper::-webkit-scrollbar {
-  width: 6px !important;
-  height: 6px !important;
+/* 全局样式 ,el-ui的弹窗*/
+.delete-dialog-top {
+  margin-top: -500px !important;  /* 距离顶部 80px */
 }
 
-.el-table__body-wrapper::-webkit-scrollbar-track {
-  background: transparent !important;
+
+/* 统一所有滚动条样式 */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 6px;
 }
 
-.el-table__body-wrapper::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2) !important;
-  border-radius: 3px !important;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
 }
 
-.el-table__body-wrapper::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.4) !important;
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
 }
