@@ -2,9 +2,9 @@
 node_modules/
 package-lock.json
 
-# 构建输出
-dist/
-dist-ssr/
+# 构建输出（如果使用 GitHub Actions 则可以忽略）
+# dist/
+# dist-ssr/
 
 # 编辑器
 .vscode/*

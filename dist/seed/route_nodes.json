@@ -1,0 +1,44 @@
+[
+  {
+    "id": 140,
+    "route_id": 5,
+    "poi_id": 1211,
+    "node_order": 1,
+    "created_at": "14/6/2026 18:10:24"
+  },
+  {
+    "id": 141,
+    "route_id": 5,
+    "poi_id": 1212,
+    "node_order": 2,
+    "created_at": "14/6/2026 18:10:24"
+  },
+  {
+    "id": 142,
+    "route_id": 5,
+    "poi_id": 1213,
+    "node_order": 3,
+    "created_at": "14/6/2026 18:10:24"
+  },
+  {
+    "id": 143,
+    "route_id": 5,
+    "poi_id": 1214,
+    "node_order": 4,
+    "created_at": "14/6/2026 18:10:24"
+  },
+  {
+    "id": 144,
+    "route_id": 5,
+    "poi_id": 1215,
+    "node_order": 5,
+    "created_at": "14/6/2026 18:10:24"
+  },
+  {
+    "id": 145,
+    "route_id": 5,
+    "poi_id": 1216,
+    "node_order": 6,
+    "created_at": "14/6/2026 18:10:24"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "id": 5,
+    "name": "测试",
+    "description": "2222",
+    "color": "#80ff18",
+    "width": 10,
+    "style": "solid",
+    "is_active": 1,
+    "created_at": "14/6/2026 18:06:09",
+    "updated_at": "14/6/2026 18:10:24"
+  }
+]
